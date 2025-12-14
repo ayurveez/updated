@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 // https://vitejs.dev/config/
 export default defineConfig({
   // **CRITICAL FIX:** Corrected base path using the repository name 'updated'
-  base: '/updated/', 
+  base: './', 
   
   plugins: [react()],
   define: {
