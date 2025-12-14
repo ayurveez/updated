@@ -1,12 +1,20 @@
 import { GoogleGenAI } from "@google/genai";
 import { StudyScheduleParams } from "../types";
 
-// Prefer Vite-style env var `VITE_GEMINI_API_KEY` for client builds, fallback to process.env.API_KEY for server
-const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || process.env.API_KEY || '';
+// Support multiple env var names for backward compatibility
+const apiKey = (
+  (import.meta.env.VITE_GEMINI_API_KEY as string) ||
+  (import.meta.env.VITE_API_KEY as string) ||
+  (process.env.GEMINI_API_KEY as string) ||
+  (process.env.API_KEY as string) ||
+  ''
+) as string;
 if (!apiKey) {
-  console.warn('Gemini API key is not configured. Set VITE_GEMINI_API_KEY in your .env file.');
+  console.warn('Gemini API key is not configured. Set VITE_GEMINI_API_KEY (or VITE_API_KEY) in your .env file.');
 }
-const ai = new GoogleGenAI({ apiKey });
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+
+const AI_NOT_CONFIGURED_MSG = "AI is not configured. Set VITE_GEMINI_API_KEY in your .env to enable AI features.";
 
 const BASE_SYSTEM_INSTRUCTION = `
 You are Ayurveez AI, an expert academic assistant for BAMS (Bachelor of Ayurvedic Medicine and Surgery) students.
@@ -43,6 +51,7 @@ export const generateChatResponse = async (
   message: string, 
   history: {role: string, parts: {text: string}[]}[]
 ): Promise<string> => {
+  if (!ai) return AI_NOT_CONFIGURED_MSG;
   try {
     const model = 'gemini-2.5-flash';
     const chat = ai.chats.create({
@@ -65,6 +74,7 @@ export const generateSathiResponse = async (
   message: string, 
   history: {role: string, parts: {text: string}[]}[]
 ): Promise<string> => {
+  if (!ai) return AI_NOT_CONFIGURED_MSG;
   try {
     const model = 'gemini-2.5-flash';
     const chat = ai.chats.create({
@@ -84,6 +94,7 @@ export const generateSathiResponse = async (
 };
 
 export const generateStudySchedule = async (params: StudyScheduleParams): Promise<string> => {
+  if (!ai) return AI_NOT_CONFIGURED_MSG;
   try {
     const prompt = `
       Create a practical, detailed study schedule for a BAMS student in their **${params.proff} Professional Year** (New NCISM Curriculum - 18 months duration).
@@ -122,6 +133,7 @@ export const generateStudySchedule = async (params: StudyScheduleParams): Promis
 };
 
 export const generateWellnessAdvice = async (topic: string): Promise<string> => {
+  if (!ai) return AI_NOT_CONFIGURED_MSG;
   try {
     const prompt = `
       Provide practical, Ayurvedic advice for a BAMS student regarding: "${topic}".
