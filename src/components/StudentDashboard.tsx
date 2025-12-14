@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Proff, Subject, Chapter, ContentItem, MCQ, StudentPermissions, ChatMessage } from '../types';
 import { dataService } from '../services/dataService';
-import { generateSathiResponse } from '../services/geminiService';
+import { generateSathiResponse, isAiConfigured } from '../services/geminiService';
 
 interface StudentDashboardProps {
   permissions: StudentPermissions;
@@ -454,7 +454,12 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ permissions 
                         </div>
                         <button onClick={() => setIsSathiOpen(false)} className="text-white/80 hover:text-white"><i className="fas fa-times"></i></button>
                     </div>
-                    
+                    {!isAiConfigured() && (
+                      <div className="p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
+                        AI is not configured. Set <span className="font-mono">VITE_GEMINI_API_KEY</span> in your <span className="font-mono">.env</span> and rebuild to enable Sathi.
+                      </div>
+                    )}
+
                     <div className="flex-1 overflow-y-auto p-3 bg-ayur-cream/30 min-h-[300px] scrollbar-hide" ref={sathiScrollRef}>
                         {sathiMessages.map((msg) => (
                             <div key={msg.id} className={`flex mb-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -478,14 +483,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ permissions 
                         <div className="flex gap-2">
                             <input 
                                 className="flex-1 border rounded-full px-3 py-2 text-xs md:text-sm focus:outline-none focus:border-ayur-green"
-                                placeholder="Ask about Nidan, Chikitsa or Studies..."
+                                placeholder={isAiConfigured() ? "Ask about Nidan, Chikitsa or Studies..." : "AI not configured: set VITE_GEMINI_API_KEY in .env"}
                                 value={sathiInput}
                                 onChange={(e) => setSathiInput(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSathiSend()}
+                                disabled={!isAiConfigured()}
                             />
                             <button 
                                 onClick={handleSathiSend}
-                                disabled={sathiLoading}
+                                disabled={sathiLoading || !isAiConfigured()}
                                 className="w-9 h-9 bg-ayur-green text-white rounded-full flex items-center justify-center hover:bg-green-700 disabled:opacity-50"
                             >
                                 <i className="fas fa-paper-plane text-xs"></i>

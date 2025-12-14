@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { generateChatResponse } from '../services/geminiService';
+import { generateChatResponse, isAiConfigured } from '../services/geminiService';
 import { ChatMessage } from '../types';
 
 export const AyurveezChat: React.FC = () => {
@@ -77,6 +77,11 @@ export const AyurveezChat: React.FC = () => {
 
         {/* Messages */}
         <div className="flex-grow overflow-y-auto p-4 bg-[#f9f9f9]" ref={scrollRef}>
+          {!isAiConfigured() && (
+            <div className="mb-4 text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 px-3 py-2 rounded">
+              AI is not configured. Set <span className="font-mono">VITE_GEMINI_API_KEY</span> in your <span className="font-mono">.env</span> and rebuild to enable chat.
+            </div>
+          )}
           {messages.map((msg) => (
             <div 
               key={msg.id} 
@@ -112,12 +117,13 @@ export const AyurveezChat: React.FC = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask about Shlokas, Herbs, or Exams..."
+              placeholder={isAiConfigured() ? "Ask about Shlokas, Herbs, or Exams..." : "AI not configured: set VITE_GEMINI_API_KEY in .env"}
               className="flex-grow p-3 border border-gray-300 rounded-full focus:outline-none focus:border-ayur-green focus:ring-1 focus:ring-ayur-green transition-all shadow-inner"
+              disabled={!isAiConfigured()}
             />
             <button 
               onClick={handleSend}
-              disabled={isLoading}
+              disabled={isLoading || !isAiConfigured()}
               className="bg-ayur-green hover:bg-green-700 text-white px-6 rounded-full font-semibold transition-colors disabled:opacity-50 shadow-md"
             >
               <i className="fas fa-paper-plane"></i>

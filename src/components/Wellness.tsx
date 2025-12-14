@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { generateWellnessAdvice } from '../services/geminiService';
+import { generateWellnessAdvice, isAiConfigured } from '../services/geminiService';
 
 export const Wellness: React.FC = () => {
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
@@ -34,18 +34,24 @@ export const Wellness: React.FC = () => {
         <p className="max-w-2xl mx-auto text-gray-600">
           BAMS is demanding. Use ancient wisdom to manage modern stress. Select a concern below to get Ayurvedic solutions.
         </p>
+        {!isAiConfigured() && (
+          <div className="mt-3 text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 px-3 py-2 rounded">
+            AI not configured. Set <span className="font-mono">VITE_GEMINI_API_KEY</span> in <span className="font-mono">.env</span> and rebuild.
+          </div>
+        )}
       </div>
 
       <div className="grid md:grid-cols-4 gap-4 mb-8">
         {topics.map((t) => (
           <button
             key={t.id}
-            onClick={() => handleTopicClick(t.label)}
+            onClick={() => isAiConfigured() && handleTopicClick(t.label)}
+            disabled={!isAiConfigured()}
             className={`p-4 rounded-xl shadow-md transition-all flex flex-col items-center gap-3 border-2 ${
               activeTopic === t.label 
                 ? 'bg-ayur-saffron text-white border-ayur-saffron transform scale-105' 
                 : 'bg-white text-gray-700 border-transparent hover:border-ayur-saffron'
-            }`}
+            } ${!isAiConfigured() ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             <i className={`fas ${t.icon} text-2xl`}></i>
             <span className="font-semibold">{t.label}</span>

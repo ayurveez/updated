@@ -34,12 +34,12 @@ Ayurveez is an AI-powered learning platform designed for BAMS (Bachelor of Ayurv
     ```
 
 3.  Set up Environment Variables:
-    - Create a `.env` file in the root directory.
-    - Add your Gemini API Key:
-      ```
-      VITE_API_KEY=your_google_gemini_api_key_here
-      ```
-      *(Note: In the code, `process.env.API_KEY` is used. If running locally with Vite, you might need to update the `vite.config.ts` or use `import.meta.env.VITE_API_KEY` for standard Vite practices. The current config bridges `process.env`).*
+        - Create a `.env` file in the root directory or copy `.env.example`.
+        - Add your Gemini API Key (recommended name):
+            ```
+            VITE_GEMINI_API_KEY=your_google_gemini_api_key_here
+            ```
+            *(You can also use `VITE_API_KEY` as a fallback.) Note: Vite embeds `import.meta.env.*` at build time — if you change or add these values you must re-run `npm run build` and redeploy the generated `docs/` (or whatever your build output) for the changes to appear on the live site.*
 
 4.  Run the development server:
     ```bash

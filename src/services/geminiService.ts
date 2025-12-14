@@ -15,6 +15,7 @@ if (!apiKey) {
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 const AI_NOT_CONFIGURED_MSG = "AI is not configured. Set VITE_GEMINI_API_KEY in your .env to enable AI features.";
+export const isAiConfigured = () => Boolean(ai);
 
 const BASE_SYSTEM_INSTRUCTION = `
 You are Ayurveez AI, an expert academic assistant for BAMS (Bachelor of Ayurvedic Medicine and Surgery) students.
