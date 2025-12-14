@@ -8,14 +8,20 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
+const applyCors = (res) => {
+  Object.entries(CORS_HEADERS).forEach(([k, v]) => res.setHeader(k, v));
+};
+
 const sendError = (res, code, message) => {
-  res.set(CORS_HEADERS).status(code).json({ error: message });
+  applyCors(res);
+  res.status(code).json({ error: message });
 };
 
 export default async function handler(req, res) {
   // Handle preflight
   if (req.method === 'OPTIONS') {
-    return res.set(CORS_HEADERS).status(204).end();
+    applyCors(res);
+    return res.status(204).end();
   }
 
   if (!API_KEY) return sendError(res, 500, 'GEMINI_API_KEY not configured on server');

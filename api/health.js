@@ -4,9 +4,15 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
+const applyCors = (res) => {
+  Object.entries(CORS_HEADERS).forEach(([k, v]) => res.setHeader(k, v));
+};
+
 export default function handler(req, res) {
   if (req.method === 'OPTIONS') {
-    return res.set(CORS_HEADERS).status(204).end();
+    applyCors(res);
+    return res.status(204).end();
   }
-  res.set(CORS_HEADERS).status(200).json({ ok: true });
+  applyCors(res);
+  res.status(200).json({ ok: true });
 }
