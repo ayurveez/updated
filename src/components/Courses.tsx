@@ -237,3 +237,5 @@ export const Home: React.FC<HomeProps> = ({ setView }) => {
     </>
   );
 };
+
+export const Courses = Home;
