@@ -1,21 +1,38 @@
-import { GoogleGenAI } from "@google/genai";
 import { StudyScheduleParams } from "../types";
 
-// Support multiple env var names for backward compatibility
-const apiKey = (
-  (import.meta.env.VITE_GEMINI_API_KEY as string) ||
-  (import.meta.env.VITE_API_KEY as string) ||
-  (process.env.GEMINI_API_KEY as string) ||
-  (process.env.API_KEY as string) ||
-  ''
-) as string;
-if (!apiKey) {
-  console.warn('Gemini API key is not configured. Set VITE_GEMINI_API_KEY (or VITE_API_KEY) in your .env file.');
-}
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+// Local build-time env presence (helps for local dev UX)
+export const isAiConfigured = () => {
+  return Boolean(
+    (import.meta.env.VITE_GEMINI_API_KEY as string) ||
+    (import.meta.env.VITE_API_KEY as string) ||
+    (process.env.GEMINI_API_KEY as string) ||
+    (process.env.API_KEY as string)
+  );
+};
 
-const AI_NOT_CONFIGURED_MSG = "AI is not configured. Set VITE_GEMINI_API_KEY in your .env to enable AI features.";
-export const isAiConfigured = () => Boolean(ai);
+const AI_NOT_CONFIGURED_MSG = "AI is not configured on the server. Contact the site admin.";
+
+async function callProxy(action: string, payload: any) {
+  const res = await fetch('/api/gemini', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, payload })
+  });
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json?.error || 'Proxy error');
+  }
+  return json;
+}
+
+export const checkAiServer = async (): Promise<boolean> => {
+  try {
+    const r = await callProxy('health', {});
+    return !!r?.ok;
+  } catch (e) {
+    return false;
+  }
+};
 
 const BASE_SYSTEM_INSTRUCTION = `
 You are Ayurveez AI, an expert academic assistant for BAMS (Bachelor of Ayurvedic Medicine and Surgery) students.
@@ -52,114 +69,43 @@ export const generateChatResponse = async (
   message: string, 
   history: {role: string, parts: {text: string}[]}[]
 ): Promise<string> => {
-  if (!ai) return AI_NOT_CONFIGURED_MSG;
   try {
-    const model = 'gemini-2.5-flash';
-    const chat = ai.chats.create({
-      model,
-      config: {
-        systemInstruction: BASE_SYSTEM_INSTRUCTION,
-      },
-      history: history 
-    });
-
-    const result = await chat.sendMessage({ message });
-    return result.text || "I apologize, I couldn't generate a response.";
-  } catch (error) {
+    const r = await callProxy('chat', { message, history, systemInstruction: BASE_SYSTEM_INSTRUCTION });
+    return r.text || "I apologize, I couldn't generate a response.";
+  } catch (error: any) {
     console.error("Gemini Chat Error:", error);
-    throw error;
+    return AI_NOT_CONFIGURED_MSG;
   }
 };
-
 export const generateSathiResponse = async (
   message: string, 
   history: {role: string, parts: {text: string}[]}[]
 ): Promise<string> => {
-  if (!ai) return AI_NOT_CONFIGURED_MSG;
   try {
-    const model = 'gemini-2.5-flash';
-    const chat = ai.chats.create({
-      model,
-      config: {
-        systemInstruction: SATHI_SYSTEM_INSTRUCTION,
-      },
-      history: history 
-    });
-
-    const result = await chat.sendMessage({ message });
-    return result.text || "I apologize, Sathi is currently offline.";
-  } catch (error) {
+    const r = await callProxy('sathi', { message, history, systemInstruction: SATHI_SYSTEM_INSTRUCTION });
+    return r.text || "I apologize, Sathi is currently offline.";
+  } catch (error: any) {
     console.error("Sathi Chat Error:", error);
-    throw error;
+    return AI_NOT_CONFIGURED_MSG;
   }
 };
 
 export const generateStudySchedule = async (params: StudyScheduleParams): Promise<string> => {
-  if (!ai) return AI_NOT_CONFIGURED_MSG;
   try {
-    const prompt = `
-      Create a practical, detailed study schedule for a BAMS student in their **${params.proff} Professional Year** (New NCISM Curriculum - 18 months duration).
-      
-      Context:
-      - Student Type: ${params.collegeStatus}
-      - Sleep Time: ${params.sleepTime}
-      - Wake Time: ${params.wakeTime}
-      
-      Requirements:
-      1. **Subject Selection:** Assign specific subjects relevant to the ${params.proff} Proff.
-         - First Proff: Padarth Vigyan, Rachana, Kriya, Sanskrit, Samhita Adhyayan.
-         - Second Proff: Dravyaguna, Rasa Shastra, Roga Nidan, Swasthavritta.
-         - Third Proff: Kayachikitsa, Panchakarma, Shalya, Shalakya, Prasuti, Kaumarbhritya.
-      2. **Routine Structure:**
-         - **Weekdays:** Focus on college/work balance with minimum 2 dedicated study sets of 1.5 hours each.
-         - **Weekends:** Dedicate time for "Revision and Practice" of the whole week's topics.
-      3. **Content:** Include specific times for Samhita reading vs Modern subjects.
-      4. **Lifestyle:** Include breaks and Ayurvedic lifestyle tips (Dinacharya) like Brahma Muhurta study.
-      5. **Format:** Output in clean Markdown. Use **Bold** for time slots and Subject names.
-    `;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        systemInstruction: "You are an Ayurvedic Academic Planner. Create strict but achievable schedules."
-      }
-    });
-
-    return response.text || "Could not generate schedule.";
-  } catch (error) {
+    const r = await callProxy('studySchedule', { params });
+    return r.text || "Could not generate schedule.";
+  } catch (error: any) {
     console.error("Gemini Schedule Error:", error);
-    throw error;
+    return AI_NOT_CONFIGURED_MSG;
   }
 };
 
 export const generateWellnessAdvice = async (topic: string): Promise<string> => {
-  if (!ai) return AI_NOT_CONFIGURED_MSG;
   try {
-    const prompt = `
-      Provide practical, Ayurvedic advice for a BAMS student regarding: "${topic}".
-      
-      Include:
-      1. Ayurvedic perspective (Nidana/Samprapti if applicable).
-      2. Specific Herbs (Medhya Rasayanas, etc.) in **Bold**.
-      3. Lifestyle changes (Vihara).
-      4. A practical approach to dealing with this during exams.
-      5. Conclude by suggesting they practice with Ayurveez Exam Series to reduce anxiety through preparation.
-      
-      Format with Markdown.
-    `;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        systemInstruction: "You are a compassionate Ayurvedic Mentor focused on student mental health."
-      }
-    });
-
-    return response.text || "Could not generate advice.";
-  } catch (error) {
+    const r = await callProxy('wellness', { topic });
+    return r.text || "Could not generate advice.";
+  } catch (error: any) {
     console.error("Gemini Wellness Error:", error);
-    throw error;
+    return AI_NOT_CONFIGURED_MSG;
   }
 };

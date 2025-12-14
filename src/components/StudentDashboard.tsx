@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Proff, Subject, Chapter, ContentItem, MCQ, StudentPermissions, ChatMessage } from '../types';
 import { dataService } from '../services/dataService';
-import { generateSathiResponse, isAiConfigured } from '../services/geminiService';
+import { generateSathiResponse, isAiConfigured, checkAiServer } from '../services/geminiService';
+import { useEffect } from 'react';
 
 interface StudentDashboardProps {
   permissions: StudentPermissions;
@@ -30,6 +31,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ permissions 
   ]);
   const [sathiLoading, setSathiLoading] = useState(false);
   const sathiScrollRef = useRef<HTMLDivElement>(null);
+  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    checkAiServer().then(ok => { if (mounted) setAiAvailable(ok); });
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
     // 1. Get all courses data
@@ -454,9 +462,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ permissions 
                         </div>
                         <button onClick={() => setIsSathiOpen(false)} className="text-white/80 hover:text-white"><i className="fas fa-times"></i></button>
                     </div>
-                    {!isAiConfigured() && (
+                    {aiAvailable === false && (
                       <div className="p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
-                        AI is not configured. Set <span className="font-mono">VITE_GEMINI_API_KEY</span> in your <span className="font-mono">.env</span> and rebuild to enable Sathi.
+                        AI is not available on the server. Set <span className="font-mono">GEMINI_API_KEY</span> in Vercel project settings.
                       </div>
                     )}
 
@@ -483,15 +491,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ permissions 
                         <div className="flex gap-2">
                             <input 
                                 className="flex-1 border rounded-full px-3 py-2 text-xs md:text-sm focus:outline-none focus:border-ayur-green"
-                                placeholder={isAiConfigured() ? "Ask about Nidan, Chikitsa or Studies..." : "AI not configured: set VITE_GEMINI_API_KEY in .env"}
+                                placeholder={aiAvailable === false ? "AI not available on server" : "Ask about Nidan, Chikitsa or Studies..."}
                                 value={sathiInput}
                                 onChange={(e) => setSathiInput(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSathiSend()}
-                                disabled={!isAiConfigured()}
+                                disabled={aiAvailable === false}
                             />
                             <button 
                                 onClick={handleSathiSend}
-                                disabled={sathiLoading || !isAiConfigured()}
+                                disabled={sathiLoading || aiAvailable === false}
                                 className="w-9 h-9 bg-ayur-green text-white rounded-full flex items-center justify-center hover:bg-green-700 disabled:opacity-50"
                             >
                                 <i className="fas fa-paper-plane text-xs"></i>

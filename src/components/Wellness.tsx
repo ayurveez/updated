@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
-import { generateWellnessAdvice, isAiConfigured } from '../services/geminiService';
+import { generateWellnessAdvice, isAiConfigured, checkAiServer } from '../services/geminiService';
+import { useEffect, useState } from 'react';
 
 export const Wellness: React.FC = () => {
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [advice, setAdvice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    checkAiServer().then(ok => { if (mounted) setAiAvailable(ok); });
+    return () => { mounted = false; };
+  }, []);
 
   const topics = [
     { id: 'exam-pressure', icon: 'fa-book-open', label: 'Exam Pressure' },
@@ -34,9 +42,9 @@ export const Wellness: React.FC = () => {
         <p className="max-w-2xl mx-auto text-gray-600">
           BAMS is demanding. Use ancient wisdom to manage modern stress. Select a concern below to get Ayurvedic solutions.
         </p>
-        {!isAiConfigured() && (
+        {aiAvailable === false && (
           <div className="mt-3 text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 px-3 py-2 rounded">
-            AI not configured. Set <span className="font-mono">VITE_GEMINI_API_KEY</span> in <span className="font-mono">.env</span> and rebuild.
+            AI is not available on the server. Set `GEMINI_API_KEY` in Vercel project settings.
           </div>
         )}
       </div>
@@ -45,13 +53,13 @@ export const Wellness: React.FC = () => {
         {topics.map((t) => (
           <button
             key={t.id}
-            onClick={() => isAiConfigured() && handleTopicClick(t.label)}
-            disabled={!isAiConfigured()}
+            onClick={() => aiAvailable !== false && handleTopicClick(t.label)}
+            disabled={aiAvailable === false}
             className={`p-4 rounded-xl shadow-md transition-all flex flex-col items-center gap-3 border-2 ${
               activeTopic === t.label 
                 ? 'bg-ayur-saffron text-white border-ayur-saffron transform scale-105' 
                 : 'bg-white text-gray-700 border-transparent hover:border-ayur-saffron'
-            } ${!isAiConfigured() ? 'opacity-60 cursor-not-allowed' : ''}`}
+            } ${aiAvailable === false ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             <i className={`fas ${t.icon} text-2xl`}></i>
             <span className="font-semibold">{t.label}</span>

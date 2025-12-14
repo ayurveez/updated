@@ -13,6 +13,7 @@ export const AyurveezChat: React.FC = () => {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+    const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,6 +21,14 @@ export const AyurveezChat: React.FC = () => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    let mounted = true;
+    checkAiServer().then(ok => {
+      if (mounted) setAiAvailable(ok);
+    });
+    return () => { mounted = false; };
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -77,9 +86,9 @@ export const AyurveezChat: React.FC = () => {
 
         {/* Messages */}
         <div className="flex-grow overflow-y-auto p-4 bg-[#f9f9f9]" ref={scrollRef}>
-          {!isAiConfigured() && (
+          {aiAvailable === false && (
             <div className="mb-4 text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 px-3 py-2 rounded">
-              AI is not configured. Set <span className="font-mono">VITE_GEMINI_API_KEY</span> in your <span className="font-mono">.env</span> and rebuild to enable chat.
+              AI is not available on the server. Ask the admin to set `GEMINI_API_KEY` in Vercel project settings.
             </div>
           )}
           {messages.map((msg) => (
@@ -117,9 +126,9 @@ export const AyurveezChat: React.FC = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder={isAiConfigured() ? "Ask about Shlokas, Herbs, or Exams..." : "AI not configured: set VITE_GEMINI_API_KEY in .env"}
+              placeholder={aiAvailable === false ? "AI not available on server" : "Ask about Shlokas, Herbs, or Exams..."}
               className="flex-grow p-3 border border-gray-300 rounded-full focus:outline-none focus:border-ayur-green focus:ring-1 focus:ring-ayur-green transition-all shadow-inner"
-              disabled={!isAiConfigured()}
+              disabled={aiAvailable === false}
             />
             <button 
               onClick={handleSend}
