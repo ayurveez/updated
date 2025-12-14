@@ -6,4 +6,9 @@
       "use": "@vercel/static-build",
       "config": { "distDir": "docs" }
     }
+    ,
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
   ]
