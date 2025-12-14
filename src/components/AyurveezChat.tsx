@@ -24,8 +24,11 @@ export const AyurveezChat: React.FC = () => {
 
   useEffect(() => {
     let mounted = true;
+    setAiAvailable(null); // show checking state
     checkAiServer().then(ok => {
       if (mounted) setAiAvailable(ok);
+    }).catch(() => {
+      if (mounted) setAiAvailable(false);
     });
     return () => { mounted = false; };
   }, []);
@@ -86,9 +89,19 @@ export const AyurveezChat: React.FC = () => {
 
         {/* Messages */}
         <div className="flex-grow overflow-y-auto p-4 bg-[#f9f9f9]" ref={scrollRef}>
+          {aiAvailable === null && (
+            <div className="mb-4 text-sm text-gray-700 bg-gray-50 border border-gray-200 px-3 py-2 rounded">
+              Checking AI availability...
+            </div>
+          )}
+
           {aiAvailable === false && (
-            <div className="mb-4 text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 px-3 py-2 rounded">
-              AI is not available on the server. Ask the admin to set `GEMINI_API_KEY` in Vercel project settings.
+            <div className="mb-4 text-sm text-yellow-800 bg-yellow-50 border border-yellow-200 px-4 py-3 rounded">
+              <div className="font-semibold">AI is not available on this host.</div>
+              <div className="mt-1">The AI backend is served from our Vercel proxy. You can use it here:</div>
+              <div className="mt-2">
+                <a href="https://updated-32qc8kqy3-ravis-projects-36fe3c97.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-ayur-green font-medium underline">Open Ayurveez AI on Vercel</a>
+              </div>
             </div>
           )}
           {messages.map((msg) => (

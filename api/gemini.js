@@ -2,11 +2,22 @@ import { GoogleGenAI } from '@google/genai';
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+};
+
 const sendError = (res, code, message) => {
-  res.status(code).json({ error: message });
+  res.set(CORS_HEADERS).status(code).json({ error: message });
 };
 
 export default async function handler(req, res) {
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.set(CORS_HEADERS).status(204).end();
+  }
+
   if (!API_KEY) return sendError(res, 500, 'GEMINI_API_KEY not configured on server');
 
   if (req.method !== 'POST') {

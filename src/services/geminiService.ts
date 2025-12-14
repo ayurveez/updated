@@ -13,7 +13,9 @@ export const isAiConfigured = () => {
 const AI_NOT_CONFIGURED_MSG = "AI is not configured on the server. Contact the site admin.";
 
 async function callProxy(action: string, payload: any) {
-  const res = await fetch('/api/gemini', {
+  const proxyBase = (import.meta.env.VITE_GEMINI_PROXY_URL as string) || '/api/gemini';
+  const url = proxyBase.endsWith('/api/gemini') || proxyBase.endsWith('/api/gemini/') ? proxyBase : proxyBase.replace(/\/$/, '') + '/api/gemini';
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action, payload })
