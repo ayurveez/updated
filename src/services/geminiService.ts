@@ -1,7 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
 import { StudyScheduleParams } from "../types";
 
-const apiKey = process.env.API_KEY || '';
+// Prefer Vite-style env var `VITE_GEMINI_API_KEY` for client builds, fallback to process.env.API_KEY for server
+const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || process.env.API_KEY || '';
+if (!apiKey) {
+  console.warn('Gemini API key is not configured. Set VITE_GEMINI_API_KEY in your .env file.');
+}
 const ai = new GoogleGenAI({ apiKey });
 
 const BASE_SYSTEM_INSTRUCTION = `
