@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { generateChatResponse, isAiConfigured } from '../services/geminiService';
+import { generateChatResponse, isAiConfigured, checkAiServer } from '../services/geminiService';
 import { ChatMessage } from '../types';
 
 export const AyurveezChat: React.FC = () => {

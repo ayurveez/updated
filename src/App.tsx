@@ -23,7 +23,7 @@ function App() {
       case ViewState.HOME:
         return <Home setView={setView} />;
       case ViewState.COURSES:
-        return <Courses />;
+        return <Courses setView={setView} />;
       case ViewState.AI_CHAT:
         return <AyurveezChat />;
       case ViewState.SCHEDULER:
