@@ -71,14 +71,14 @@ export const Home: React.FC<HomeProps> = ({ setView }) => {
             { icon: 'fa-rupee-sign', title: 'Flexible Payment', desc: 'Pay per subject or complete proff.' },
             { icon: 'fa-headset', title: 'Personal Mentorship', desc: 'Direct doubt solving calls with Dr. Ravi.' },
           ].map((f, i) => (
-            <div key={i} className="feature-card">
-              <div className="feature-icon">
+            <div key={i} className="bg-white p-8 rounded-2xl shadow-sm border-t-4 border-ayur-green hover:-translate-y-2 transition-transform text-center group">
+              <div className="text-4xl text-ayur-saffron mb-4 group-hover:scale-110 transition-transform">
                 <i className={`fas ${f.icon}`}></i>
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">{f.title}</h3>
               <p className="text-gray-600">{f.desc}</p>
             </div>
-          ))} 
+          ))}
         </div>
       </section>
 
@@ -91,81 +91,105 @@ export const Home: React.FC<HomeProps> = ({ setView }) => {
 
         <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* First Proff */}
-          <div className="course-card glow-on-hover" onClick={() => setView(ViewState.COURSES)}>
-            <div className="course-header">
-              {liveStatus['first-proff'] && <div className="course-badge">Live Now</div>}
+          <div className="bg-white rounded-xl overflow-hidden border-2 border-ayur-green hover:shadow-xl transition-all cursor-pointer flex flex-col h-full" onClick={() => setView(ViewState.COURSES)}>
+            <div className="bg-ayur-green text-white p-5 text-center">
               <h3 className="text-xl font-bold">FIRST PROFESSIONAL</h3>
               <p className="text-sm opacity-90">18 Months Duration</p>
             </div>
-            <div className="course-body">
-              <div className="course-features">
-                <div className="course-feature-item"><i className="fas fa-book-medical"></i><span>Padarth Vigyan</span></div>
-                <div className="course-feature-item"><i className="fas fa-bone"></i><span>Rachana Sharir</span></div>
-                <div className="course-feature-item"><i className="fas fa-brain"></i><span>Kriya Sharir</span></div>
-                <div className="course-feature-item"><i className="fas fa-book"></i><span>Maulik Siddhant</span></div>
+            <div className="p-6 flex flex-col flex-1 justify-between">
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center gap-2"><i className="fas fa-book-medical text-ayur-saffron"></i> Padarth Vigyan</li>
+                <li className="flex items-center gap-2"><i className="fas fa-bone text-ayur-saffron"></i> Rachana Sharir</li>
+                <li className="flex items-center gap-2"><i className="fas fa-brain text-ayur-saffron"></i> Kriya Sharir</li>
+                <li className="flex items-center gap-2"><i className="fas fa-book text-ayur-saffron"></i> Maulik Siddhant</li>
+              </ul>
+              <div className="text-center">
+                <span className="block text-2xl font-bold text-ayur-brown mb-3">₹1,999</span>
+                <button className="w-full py-2 bg-ayur-saffron text-white rounded font-semibold">View Details</button>
               </div>
-              <div className="course-price">₹1,999</div>
-              <button className="w-full py-3 bg-gradient-to-r from-ayur-saffron to-orange-500 text-white rounded-xl font-bold hover:shadow-lg transition-all">View Details</button>
             </div>
           </div>
 
           {/* Second Proff */}
-          <div className="course-card" onClick={() => setView(ViewState.COURSES)}>
+          <div className="bg-white rounded-xl overflow-hidden border-2 border-gray-300 relative flex flex-col h-full" onClick={() => setView(ViewState.COURSES)}>
+             {/* Mobile-Friendly Overlay */}
             {!liveStatus['second-proff'] && (
-              <div className="coming-soon-overlay"><div className="coming-soon-badge">Coming Soon</div></div>
-            )}
-            <div className="course-header">
-              {liveStatus['second-proff'] && <div className="course-badge">Live Now</div>}
-              <h3 className="text-xl font-bold">SECOND PROFESSIONAL</h3>
-              <p className="text-sm opacity-90">18 Months Duration</p>
-            </div>
-            <div className={`course-body ${!liveStatus['second-proff'] ? 'opacity-60 filter blur-[1px]' : ''}`}>
-              <div className="course-features">
-                <div className="course-feature-item"><i className="fas fa-prescription-bottle"></i><span>Dravyaguna</span></div>
-                <div className="course-feature-item"><i className="fas fa-mortar-pestle"></i><span>Rasa Shastra</span></div>
-                <div className="course-feature-item"><i className="fas fa-stethoscope"></i><span>Rog Nidan</span></div>
-                <div className="course-feature-item"><i className="fas fa-scroll"></i><span>Charak Samhita</span></div>
+              <div className="absolute inset-0 bg-white/40 z-20 flex items-center justify-center">
+                  <div className="bg-ayur-saffron text-white px-6 py-2 rounded-full font-bold shadow-lg transform -rotate-12 border-2 border-white">
+                      Coming Soon
+                  </div>
               </div>
-              <div className="course-price">₹2,999</div>
-              <button className={`w-full py-3 rounded font-semibold ${!liveStatus['second-proff'] ? 'bg-gray-500 text-white cursor-default' : 'bg-gradient-to-r from-ayur-saffron to-orange-500 text-white rounded-xl font-bold'}`}>
-                {liveStatus['second-proff'] ? 'View Details' : 'Coming Soon'}
-              </button>
+            )}
+            <div className="bg-gray-700 text-white p-5 text-center relative overflow-hidden">
+               <div className="absolute inset-0 bg-white/10 opacity-50"></div>
+               <h3 className="text-xl font-bold relative z-10">SECOND PROFESSIONAL</h3>
+               <p className="text-sm opacity-90 relative z-10">18 Months Duration</p>
+            </div>
+            <div className={`p-6 flex flex-col flex-1 justify-between ${!liveStatus['second-proff'] ? 'opacity-60 filter blur-[1px]' : ''}`}>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center gap-2"><i className="fas fa-prescription-bottle text-gray-400"></i> Dravyaguna</li>
+                <li className="flex items-center gap-2"><i className="fas fa-mortar-pestle text-gray-400"></i> Rasa Shastra</li>
+                <li className="flex items-center gap-2"><i className="fas fa-stethoscope text-gray-400"></i> Rog Nidan</li>
+                <li className="flex items-center gap-2"><i className="fas fa-scroll text-gray-400"></i> Charak Samhita</li>
+              </ul>
+              <div className="text-center">
+                <span className="block text-2xl font-bold text-gray-500 mb-3">₹2,999</span>
+                <button className={`w-full py-2 rounded font-semibold ${!liveStatus['second-proff'] ? 'bg-gray-500 text-white cursor-default' : 'bg-ayur-saffron text-white cursor-pointer'}`}>
+                  {liveStatus['second-proff'] ? 'View Details' : 'Coming Soon'}
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Third Proff */}
-          <div className="course-card" onClick={() => setView(ViewState.COURSES)}>
+          <div className="bg-white rounded-xl overflow-hidden border-2 border-gray-300 relative flex flex-col h-full" onClick={() => setView(ViewState.COURSES)}>
+            {/* Mobile-Friendly Overlay */}
             {!liveStatus['third-proff'] && (
-              <div className="coming-soon-overlay"><div className="coming-soon-badge">Coming Soon</div></div>
-            )}
-            <div className="course-header">
-              {liveStatus['third-proff'] && <div className="course-badge">Live Now</div>}
-              <h3 className="text-xl font-bold">THIRD PROFESSIONAL</h3>
-              <p className="text-sm opacity-90">18 Months Duration</p>
-            </div>
-            <div className={`course-body ${!liveStatus['third-proff'] ? 'opacity-60 filter blur-[1px]' : ''}`}>
-              <div className="course-features">
-                <div className="course-feature-item"><i className="fas fa-spa"></i><span>Panchakarma</span></div>
-                <div className="course-feature-item"><i className="fas fa-baby"></i><span>Kaumarbhritya</span></div>
-                <div className="course-feature-item"><i className="fas fa-eye"></i><span>Shalakya Tantra</span></div>
-                <div className="course-feature-item"><i className="fas fa-user-md"></i><span>Kayachikitsa</span></div>
+              <div className="absolute inset-0 bg-white/40 z-20 flex items-center justify-center">
+                  <div className="bg-ayur-saffron text-white px-6 py-2 rounded-full font-bold shadow-lg transform -rotate-12 border-2 border-white">
+                      Coming Soon
+                  </div>
               </div>
-              <div className="course-price">₹4,999</div>
-              <button className={`w-full py-3 rounded font-semibold ${!liveStatus['third-proff'] ? 'bg-gray-500 text-white cursor-default' : 'bg-gradient-to-r from-ayur-saffron to-orange-500 text-white rounded-xl font-bold'}`}>
-                {liveStatus['third-proff'] ? 'View Details' : 'Coming Soon'}
-              </button>
+            )}
+            <div className="bg-gray-700 text-white p-5 text-center relative">
+              <h3 className="text-xl font-bold relative z-10">THIRD PROFESSIONAL</h3>
+              <p className="text-sm opacity-90 relative z-10">18 Months Duration</p>
+            </div>
+            <div className={`p-6 flex flex-col flex-1 justify-between ${!liveStatus['third-proff'] ? 'opacity-60 filter blur-[1px]' : ''}`}>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center gap-2"><i className="fas fa-spa text-gray-400"></i> Panchakarma</li>
+                <li className="flex items-center gap-2"><i className="fas fa-baby text-gray-400"></i> Kaumarbhritya</li>
+                <li className="flex items-center gap-2"><i className="fas fa-eye text-gray-400"></i> Shalakya Tantra</li>
+                <li className="flex items-center gap-2"><i className="fas fa-user-md text-gray-400"></i> Kayachikitsa</li>
+              </ul>
+              <div className="text-center">
+                <span className="block text-2xl font-bold text-gray-500 mb-3">₹4,999</span>
+                <button className={`w-full py-2 rounded font-semibold ${!liveStatus['third-proff'] ? 'bg-gray-500 text-white cursor-default' : 'bg-ayur-saffron text-white cursor-pointer'}`}>
+                  {liveStatus['third-proff'] ? 'View Details' : 'Coming Soon'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* AI Teaser */}
-      <section className="ai-teaser">
-        <div className="ai-container text-center">
-          <div className="ai-avatar"><i className="fas fa-robot"></i></div>
+      <section className="py-20 px-4 bg-gradient-to-br from-[#e8f5e9] to-[#fff3e0] text-center">
+        <div className="max-w-3xl mx-auto bg-white p-10 rounded-3xl shadow-xl border-4 border-ayur-gold/30">
+          <div className="w-24 h-24 bg-gradient-to-br from-ayur-saffron to-ayur-gold rounded-full flex items-center justify-center text-4xl text-white mx-auto mb-6 shadow-lg">
+            <i className="fas fa-robot"></i>
+          </div>
           <h2 className="text-3xl font-bold text-ayur-brown mb-4">Meet Ayurveez AI</h2>
-          <p className="text-lg text-gray-700 mb-8">Your 24/7 Ayurveda study assistant. Get personalized study plans, exam preparation strategies, and instant answers to clinical queries.</p>
-          <button onClick={() => setView(ViewState.AI_CHAT)} className="bg-ayur-green text-white px-8 py-3 rounded-full font-bold shadow-md hover:bg-green-700 transition-colors">Start Chatting Now</button>
+          <p className="text-lg text-gray-700 mb-8">
+            Your 24/7 Ayurveda study assistant. Get personalized study plans, 
+            exam preparation strategies, and instant answers to clinical queries.
+          </p>
+          <button 
+            onClick={() => setView(ViewState.AI_CHAT)}
+            className="bg-ayur-green text-white px-8 py-3 rounded-full font-bold shadow-md hover:bg-green-700 transition-colors"
+          >
+            Start Chatting Now
+          </button>
         </div>
       </section>
       
@@ -173,30 +197,29 @@ export const Home: React.FC<HomeProps> = ({ setView }) => {
       <section className="py-16 px-4 bg-white">
         <div className="max-w-4xl mx-auto bg-ayur-cream p-8 md:p-12 rounded-2xl border-2 border-ayur-green/30">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-ayur-brown mb-10">How to Enroll</h2>
-          <div className="enrollment-steps grid md:grid-cols-4 gap-6 text-center">
+          <div className="grid md:grid-cols-4 gap-6 text-center">
              {[
                { num: 1, title: 'Choose Course', desc: 'Select Proff or Subject' },
                { num: 2, title: 'Make Payment', desc: 'Use the Secure Link' },
                { num: 3, title: 'Send Screenshot', desc: 'WhatsApp: 9376884568' },
                { num: 4, title: 'Get Access', desc: 'Unique dashboard code' },
              ].map((step) => (
-               <div key={step.num} className="step-card">
-                 <div className="step-number">{step.num}</div>
+               <div key={step.num}>
+                 <div className="w-14 h-14 bg-ayur-saffron text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                   {step.num}
+                 </div>
                  <h4 className="font-bold text-lg mb-1">{step.title}</h4>
                  <p className="text-sm text-gray-600">{step.desc}</p>
                </div>
              ))}
           </div>
           <div className="mt-10 text-center">
-             <div className="payment-info">
-               <h4 className="font-bold text-lg mb-4">How to Pay</h4>
-               <div className="payment-details">
-                 <p><strong>WhatsApp Payment Message Format:</strong></p>
-                 <p>Name: [Your Full Name]</p>
-                 <p>Course: [Proff/Subject Name]</p>
-                 <p>Amount: ₹[Amount Paid]</p>
-                 <p>Transaction ID: [Last 4 digits]</p>
-               </div>
+             <div className="bg-white inline-block p-4 rounded-lg border border-gray-200 text-left font-mono text-sm shadow-inner overflow-x-auto max-w-full">
+               <p><strong>WhatsApp Payment Message Format:</strong></p>
+               <p>Name: [Your Full Name]</p>
+               <p>Course: [Proff/Subject Name]</p>
+               <p>Amount: ₹[Amount Paid]</p>
+               <p>Transaction ID: [Last 4 digits]</p>
              </div>
              <div className="mt-6">
                 <p className="mb-2 text-gray-700 text-sm">Or Pay via UPI ID: <strong>thersk@axl</strong></p>
@@ -313,7 +336,7 @@ export const Courses: React.FC = () => {
 
   return (
     <div>
-      <style>{`\n        .page-header { padding: 60px 5% 40px; text-align: center; background: linear-gradient(rgba(245, 245, 220, 0.9), rgba(245, 245, 220, 0.9)), url('https://images.unsplash.com/photo-1542736667-069246bdbc6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center; }\n        .page-title { font-size: 2.5rem; color: #8B4513; margin-bottom: 10px; font-weight:700 }\n        .page-subtitle { font-size: 1.1rem; color: #FF9933; max-width: 800px; margin: 0 auto; font-weight:600 }\n        h2, h3, h4 { font-weight: 700 }\n        .proff-nav { display:flex; justify-content:center; gap:20px; margin:30px 0; flex-wrap:wrap; }\n        .proff-tab { padding: 12px 30px; background:white; border:2px solid #138808; border-radius:50px; font-weight:700; cursor:pointer; transition: all .25s; color:#8B4513 }\n        .proff-tab:hover { background:#e8f5e9 }\n        .proff-tab.active { background:#138808; color:white; border-color:#138808 }\n        .proff-container { display:none; padding:0 5% 60px }\n        .proff-container.active { display:block; animation: fadeIn .5s ease }\n        @keyframes fadeIn { from { opacity:0; transform: translateY(20px) } to { opacity:1; transform: translateY(0) } }\n        .pricing-comparison { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap:30px; margin:40px 0 60px }\n        .price-card { background:white; border-radius:15px; padding:35px; box-shadow:0 10px 30px rgba(0,0,0,0.08); text-align:center; border:2px solid #e9e0df }\n        .price-card.best-value { border-color:#FF9933; transform:scale(1.02) }\n        .best-badge { position:absolute; top:-15px; left:50%; transform:translateX(-50%); background:#FF9933; color:white; padding:8px 25px; border-radius:25px }\n        .price { font-size: 2.5rem; color: #FF9933; font-weight: 800 }\n        .price-card .price-period { color:#666 }\n        .price-display { font-size: 3rem; color: #FF9933; font-weight:800; margin: 20px 0 }
+      <style>{`\n        .page-header { padding: 60px 5% 40px; text-align: center; background: linear-gradient(rgba(245, 245, 220, 0.9), rgba(245, 245, 220, 0.9)), url('https://images.unsplash.com/photo-1542736667-069246bdbc6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center; }\n        .page-title { font-size: 2.5rem; color: #8B1A1A; margin-bottom: 10px; font-weight:800 }\n        .page-subtitle { font-size: 1.1rem; color: #8B1A1A; max-width: 800px; margin: 0 auto; font-weight:700 }\n        h2, h3, h4 { font-weight: 700 }\n        .proff-nav { display:flex; justify-content:center; gap:20px; margin:30px 0; flex-wrap:wrap; }\n        .proff-tab { padding: 12px 30px; background:white; border:2px solid #138808; border-radius:50px; font-weight:700; cursor:pointer; transition: all .25s; color:#8B1A1A }\n        .proff-tab:hover { background:#e8f5e9 }\n        .proff-tab.active { background:#138808; color:white; border-color:#138808 }\n        .proff-container { display:none; padding:0 5% 60px }\n        .proff-container.active { display:block; animation: fadeIn .5s ease }\n        @keyframes fadeIn { from { opacity:0; transform: translateY(20px) } to { opacity:1; transform: translateY(0) } }\n        .pricing-comparison { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap:30px; margin:40px 0 60px }\n        .price-card { background:white; border-radius:15px; padding:35px; box-shadow:0 10px 30px rgba(0,0,0,0.08); text-align:center; border:2px solid #e9e0df }\n        .price-card.best-value { border-color:#FF9933; transform:scale(1.02) }\n        .best-badge { position:absolute; top:-15px; left:50%; transform:translateX(-50%); background:#FF9933; color:white; padding:8px 25px; border-radius:25px }\n        .price { font-size: 2.5rem; color: #FF9933; font-weight: 800 }\n        .price-card .price-period { color:#666 }\n        .price-display { font-size: 3rem; color: #FF9933; font-weight:800; margin: 20px 0 }
         /* Maroon heading and professional accents */
         .price-card h3 { color: #8B1A1A; font-weight:800; font-size:1.05rem; margin-bottom:6px }
         .price-card p { color: #8B1A1A; font-weight:700 }
@@ -322,8 +345,9 @@ export const Courses: React.FC = () => {
         .subject-card h4 { color:#8B1A1A; font-weight:800; margin:6px 0 }
         .subject-details span { color:#8B1A1A; font-weight:700 }\n        .modal-overlay { display: ${subjectModalOpen ? 'flex' : 'none'}; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center; padding:20px }\n        .modal-content { background:white; border-radius:20px; max-width:1200px; width:100%; max-height:85vh; overflow-y:auto }\n        .modal-header { background: linear-gradient(135deg,#138808,#FF9933); color:white; padding:25px 30px; border-radius:20px 20px 0 0; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0 }\n        .modal-body { padding:30px }\n        .folder-header { background:#E8F5E9; padding:20px; display:flex; align-items:center; gap:15px; border-bottom:2px solid #138808 }\n        .chapters-container { max-height:400px; overflow-y:auto; padding:10px }\n        .chapter-folder { margin-bottom:15px; border:1px solid #e0e0e0; border-radius:10px }\n        .chapter-header { background:#F5F5DC; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer }\n        .lectures-container { display:none; padding:15px; background:white; border-top:1px solid #eee }\n        .lectures-container.open { display:block }\n        .lecture-item { padding:12px 15px; margin-bottom:10px; border:1px solid #e0e0e0; border-radius:8px; display:flex; justify-content:space-between; align-items:center }\n        .lecture-item.free { border-color:#E8F5E9; background:#E8F5E9 }\n        .video-modal { display: ${videoModalOpen ? 'flex' : 'none'}; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:3000; align-items:center; justify-content:center; padding:20px }\n        .video-container { width:100%; max-width:1000px; background:black; border-radius:10px; overflow:hidden }\n        .video-header { background:#222; padding:15px 20px; color:white; display:flex; justify-content:space-between; align-items:center }\n        .video-player { width:100%; aspect-ratio:16/9; background:#000 }\n      `}</style>
 
-      <section className="hero-section">
-        <h1 className="hero-title">BAMS Professional Courses</h1>
+      <section className="page-header">
+        <h1 className="page-title">BAMS Professional Courses</h1>
+        <p className="page-subtitle">Choose your professional year or buy subjects individually. Each course includes chapter-wise videos, notes, and tests.</p>
       </section>
 
       <div className="proff-nav">
@@ -371,7 +395,7 @@ export const Courses: React.FC = () => {
           </div>
         </div>
 
-        <h2 style={{color: '#8B4513', textAlign: 'center', marginBottom: 20}}>First Professional Subjects</h2>
+        <h2 style={{color: '#8B1A1A', textAlign: 'center', marginBottom: 20}}>First Professional Subjects</h2>
         <p style={{textAlign: 'center', color:'#666', maxWidth:800, margin:'0 auto 30px'}}>Click on any subject to see detailed chapter list with FREE preview lectures</p>
 
         <div className="subjects-grid">
@@ -415,7 +439,7 @@ export const Courses: React.FC = () => {
           </div>
         </div>
 
-        <h2 style={{color: '#8B4513', textAlign: 'center', marginBottom: 20}}>Second Professional Subjects</h2>
+        <h2 style={{color: '#8B1A1A', textAlign: 'center', marginBottom: 20}}>Second Professional Subjects</h2>
         <div className="subjects-grid">
           {['Dravyaguna Vigyan','Rasa Shastra & Bhaishajya Kalpana','Rog Nidan & Vikriti Vigyan','Charak Samhita (Uttarardha)','Swasthavritta & Yoga','Agada Tantra (Forensic)'].map((name) => (
             <div className="subject-card" key={name} onClick={() => openSubjectModal(name, 'second', 599)}>
@@ -444,7 +468,7 @@ export const Courses: React.FC = () => {
           </div>
         </div>
 
-        <h2 style={{color: '#8B4513', textAlign: 'center', marginBottom: 20}}>Final Professional Subjects</h2>
+        <h2 style={{color: '#8B1A1A', textAlign: 'center', marginBottom: 20}}>Final Professional Subjects</h2>
         <div className="subjects-grid">
           {['Panchakarma','Prasuti Tantra & Stri Roga','Kaumarbhritya','Agad Tantra','Shalakya Tantra','Kayachikitsa','Shalya Tantra','Research Methodology & Medical Statistics','Modern Medicine'].map((name) => (
             <div className="subject-card" key={name} onClick={() => openSubjectModal(name, 'final', 699)}>
@@ -467,12 +491,12 @@ export const Courses: React.FC = () => {
             {currentSubject && (
               <>
                 <div style={{marginBottom: 30}}>
-                  <h3 style={{color: '#8B4513', marginBottom: 10}}>{currentSubjectName}</h3>
+                  <h3 style={{color: '#8B1A1A', marginBottom: 10}}>{currentSubjectName}</h3>
                   <p>{currentSubject.description}</p>
                 </div>
 
                 <div className="subject-folder">
-                  <div className="folder-header"><i className="fas fa-folder"></i><div><h4 style={{color: '#8B4513', margin: 0}}>{currentSubjectName} Course Content</h4><p style={{color:'#666', margin:'5px 0 0'}}>{currentSubject.chapters.length} Chapters • {currentSubject.chapters.reduce((total, ch) => total + ch.lectures.length, 0)} Lectures</p></div></div>
+                  <div className="folder-header"><i className="fas fa-folder"></i><div><h4 style={{color: '#8B1A1A', margin: 0}}>{currentSubjectName} Course Content</h4><p style={{color:'#666', margin:'5px 0 0'}}>{currentSubject.chapters.length} Chapters • {currentSubject.chapters.reduce((total, ch) => total + ch.lectures.length, 0)} Lectures</p></div></div>
                   <div className="chapters-container">
                     {currentSubject.chapters.map((chapter, ci) => (
                       <div className="chapter-folder" key={ci}>
@@ -506,7 +530,7 @@ export const Courses: React.FC = () => {
                 </div>
 
                 <div className="purchase-section" style={{marginTop:20}}>
-                  <h3 style={{color:'#8B4513', marginBottom:15}}>Ready to Unlock Full Course?</h3>
+                  <h3 style={{color:'#8B1A1A', marginBottom:15}}>Ready to Unlock Full Course?</h3>
                   <p style={{color:'#666', marginBottom:20}}>Get complete access to all chapters, videos, notes, and tests.</p>
                   <div className="price-display">₹{currentSubject?.price || currentPrice}</div>
                   <div style={{display:'flex', justifyContent:'center', gap:15, marginTop:30}}>
