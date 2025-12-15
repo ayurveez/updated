@@ -37,7 +37,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
           onClick={() => setView(ViewState.HOME)}
         >
           <div className="w-12 h-12 flex items-center justify-center">
-             <img src="logo.png" alt="Ayurveez" className="w-full h-full object-contain" />
+             <img src="/logo.jpg" alt="Ayurveez" className="w-full h-full object-contain" loading="lazy" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-ayur-green tracking-wide">AYURVEEZ</h1>
