@@ -1,13 +1,3 @@
-export default async (req, res) => {
-  try {
-    // Simple health check to verify serverless functions are reachable
-    res.setHeader('Content-Type', 'application/json');
-    return res.status(200).json({ ok: true, route: '/api/health' });
-  } catch (err) {
-    console.error('Health handler error:', err);
-    try { return res.status(500).json({ ok: false, error: String(err) }); } catch { /* ignore */ }
-  }
-};
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
@@ -19,10 +9,17 @@ const applyCors = (res) => {
 };
 
 export default function handler(req, res) {
-  if (req.method === 'OPTIONS') {
+  try {
+    // Handle preflight
+    if (req.method === 'OPTIONS') {
+      applyCors(res);
+      return res.status(204).end();
+    }
     applyCors(res);
-    return res.status(204).end();
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(200).json({ ok: true, route: '/api/health' });
+  } catch (err) {
+    console.error('Health handler error:', err);
+    try { return res.status(500).json({ ok: false, error: String(err) }); } catch { /* ignore */ }
   }
-  applyCors(res);
-  res.status(200).json({ ok: true });
 }
