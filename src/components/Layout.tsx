@@ -37,7 +37,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
           onClick={() => setView(ViewState.HOME)}
         >
           <div className="w-12 h-12 flex items-center justify-center">
-             <img src={`${import.meta.env.BASE_URL}logo.jpg`} alt="Ayurveez" className="w-full h-full object-contain" loading="lazy" />
+            {/* Build a safe logo URL from BASE_URL so GH Pages and root deployments both work */}
+            <img
+              src={`${(import.meta.env.BASE_URL || '/').replace(/\/$/, '')}/logo.jpg`}
+              alt="Ayurveez"
+              className="w-full h-full object-contain"
+              loading="lazy"
+            />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-ayur-green tracking-wide">AYURVEEZ</h1>

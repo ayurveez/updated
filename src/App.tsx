@@ -18,20 +18,16 @@ function App() {
     allowedSubjects: []
   });
 
-  // Handle direct links (e.g., /courses or GitHub Pages base path)
+  // Handle direct links (e.g., /courses or /updated/courses on GitHub Pages)
   React.useEffect(() => {
     try {
-      const base = import.meta.env.BASE_URL || '/';
-      const path = window.location.pathname.replace(base, '').replace(/^\//, '');
-      const first = path.split('/').filter(Boolean)[0];
-      switch (first) {
-        case 'courses': setView(ViewState.COURSES); break;
-        case 'ai': setView(ViewState.AI_CHAT); break;
-        case 'scheduler': setView(ViewState.SCHEDULER); break;
-        case 'wellness': setView(ViewState.WELLNESS); break;
-        case 'login': setView(ViewState.LOGIN); break;
-        default: break;
-      }
+      const pathname = window.location.pathname || '/';
+      const segments = pathname.split('/').filter(Boolean);
+      if (segments.includes('courses')) return setView(ViewState.COURSES);
+      if (segments.includes('ai')) return setView(ViewState.AI_CHAT);
+      if (segments.includes('scheduler')) return setView(ViewState.SCHEDULER);
+      if (segments.includes('wellness')) return setView(ViewState.WELLNESS);
+      if (segments.includes('login')) return setView(ViewState.LOGIN);
     } catch (e) {
       // ignore (e.g., non-browser env)
     }
