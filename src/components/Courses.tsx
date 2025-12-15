@@ -238,4 +238,138 @@ export const Home: React.FC<HomeProps> = ({ setView }) => {
   );
 };
 
-export const Courses = Home;
+// Dedicated Courses page (renders only the courses-focused sections)
+export const Courses: React.FC = () => {
+  return (
+    <>
+      {/* Courses Preview Section */}
+      <section className="py-16 px-4 md:px-12 bg-ayur-cream/50">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-ayur-brown mb-4">BAMS Courses Structure</h2>
+          <div className="w-20 h-1 bg-ayur-saffron mx-auto rounded mb-8"></div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          {/* First Proff */}
+          <div className="bg-white rounded-xl overflow-hidden border-2 border-ayur-green hover:shadow-xl transition-all cursor-pointer flex flex-col h-full">
+            <div className="bg-ayur-green text-white p-5 text-center">
+              <h3 className="text-xl font-bold">FIRST PROFESSIONAL</h3>
+              <p className="text-sm opacity-90">18 Months Duration</p>
+            </div>
+            <div className="p-6 flex flex-col flex-1 justify-between">
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center gap-2"><i className="fas fa-book-medical text-ayur-saffron"></i> Padarth Vigyan</li>
+                <li className="flex items-center gap-2"><i className="fas fa-bone text-ayur-saffron"></i> Rachana Sharir</li>
+                <li className="flex items-center gap-2"><i className="fas fa-brain text-ayur-saffron"></i> Kriya Sharir</li>
+                <li className="flex items-center gap-2"><i className="fas fa-book text-ayur-saffron"></i> Maulik Siddhant</li>
+              </ul>
+              <div className="text-center">
+                <span className="block text-2xl font-bold text-ayur-brown mb-3">₹1,999</span>
+                <button className="w-full py-2 bg-ayur-saffron text-white rounded font-semibold">View Details</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Second Proff */}
+          <div className="bg-white rounded-xl overflow-hidden border-2 border-gray-300 relative flex flex-col h-full">
+             {/* Mobile-Friendly Overlay */}
+            <div className="absolute inset-0 bg-white/40 z-20 flex items-center justify-center">
+                <div className="bg-ayur-saffron text-white px-6 py-2 rounded-full font-bold shadow-lg transform -rotate-12 border-2 border-white">
+                    Coming Soon
+                </div>
+            </div>
+            <div className="bg-gray-700 text-white p-5 text-center relative overflow-hidden">
+               <div className="absolute inset-0 bg-white/10 opacity-50"></div>
+               <h3 className="text-xl font-bold relative z-10">SECOND PROFESSIONAL</h3>
+               <p className="text-sm opacity-90 relative z-10">18 Months Duration</p>
+            </div>
+            <div className={`p-6 flex flex-col flex-1 justify-between ${'opacity-60 filter blur-[1px]'}`}>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center gap-2"><i className="fas fa-prescription-bottle text-gray-400"></i> Dravyaguna</li>
+                <li className="flex items-center gap-2"><i className="fas fa-mortar-pestle text-gray-400"></i> Rasa Shastra</li>
+                <li className="flex items-center gap-2"><i className="fas fa-stethoscope text-gray-400"></i> Rog Nidan</li>
+                <li className="flex items-center gap-2"><i className="fas fa-scroll text-gray-400"></i> Charak Samhita</li>
+              </ul>
+              <div className="text-center">
+                <span className="block text-2xl font-bold text-gray-500 mb-3">₹2,999</span>
+                <button className={`w-full py-2 rounded font-semibold bg-gray-500 text-white cursor-default`}>
+                  Coming Soon
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Third Proff */}
+          <div className="bg-white rounded-xl overflow-hidden border-2 border-gray-300 relative flex flex-col h-full">
+            {/* Mobile-Friendly Overlay */}
+            <div className="absolute inset-0 bg-white/40 z-20 flex items-center justify-center">
+                <div className="bg-ayur-saffron text-white px-6 py-2 rounded-full font-bold shadow-lg transform -rotate-12 border-2 border-white">
+                    Coming Soon
+                </div>
+            </div>
+            <div className="bg-gray-700 text-white p-5 text-center relative">
+              <h3 className="text-xl font-bold relative z-10">THIRD PROFESSIONAL</h3>
+              <p className="text-sm opacity-90 relative z-10">18 Months Duration</p>
+            </div>
+            <div className={`p-6 flex flex-col flex-1 justify-between ${'opacity-60 filter blur-[1px]'}`}>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center gap-2"><i className="fas fa-spa text-gray-400"></i> Panchakarma</li>
+                <li className="flex items-center gap-2"><i className="fas fa-baby text-gray-400"></i> Kaumarbhritya</li>
+                <li className="flex items-center gap-2"><i className="fas fa-eye text-gray-400"></i> Shalakya Tantra</li>
+                <li className="flex items-center gap-2"><i className="fas fa-user-md text-gray-400"></i> Kayachikitsa</li>
+              </ul>
+              <div className="text-center">
+                <span className="block text-2xl font-bold text-gray-500 mb-3">₹4,999</span>
+                <button className={`w-full py-2 rounded font-semibold bg-gray-500 text-white cursor-default`}>
+                  Coming Soon
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Enrollment Info */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-4xl mx-auto bg-ayur-cream p-8 md:p-12 rounded-2xl border-2 border-ayur-green/30">
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-ayur-brown mb-10">How to Enroll</h2>
+          <div className="grid md:grid-cols-4 gap-6 text-center">
+             {[
+               { num: 1, title: 'Choose Course', desc: 'Select Proff or Subject' },
+               { num: 2, title: 'Make Payment', desc: 'Use the Secure Link' },
+               { num: 3, title: 'Send Screenshot', desc: 'WhatsApp: 9376884568' },
+               { num: 4, title: 'Get Access', desc: 'Unique dashboard code' },
+             ].map((step) => (
+               <div key={step.num}>
+                 <div className="w-14 h-14 bg-ayur-saffron text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                   {step.num}
+                 </div>
+                 <h4 className="font-bold text-lg mb-1">{step.title}</h4>
+                 <p className="text-sm text-gray-600">{step.desc}</p>
+               </div>
+             ))}
+          </div>
+          <div className="mt-10 text-center">
+             <div className="bg-white inline-block p-4 rounded-lg border border-gray-200 text-left font-mono text-sm shadow-inner overflow-x-auto max-w-full">
+               <p><strong>WhatsApp Payment Message Format:</strong></p>
+               <p>Name: [Your Full Name]</p>
+               <p>Course: [Proff/Subject Name]</p>
+               <p>Amount: ₹[Amount Paid]</p>
+               <p>Transaction ID: [Last 4 digits]</p>
+             </div>
+             <div className="mt-6">
+                <p className="mb-2 text-gray-700 text-sm">Or Pay via UPI ID: <strong>thersk@axl</strong></p>
+                <a 
+                  href={PAYMENT_LINK} 
+                  target="_blank" 
+                  className="bg-ayur-green text-white px-8 py-3 rounded-full font-bold shadow hover:bg-green-700 transition-colors inline-block text-lg"
+                >
+                  Pay via Secure Link
+                </a>
+             </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+};
