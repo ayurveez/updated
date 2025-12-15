@@ -18,6 +18,25 @@ function App() {
     allowedSubjects: []
   });
 
+  // Handle direct links (e.g., /courses or GitHub Pages base path)
+  React.useEffect(() => {
+    try {
+      const base = import.meta.env.BASE_URL || '/';
+      const path = window.location.pathname.replace(base, '').replace(/^\//, '');
+      const first = path.split('/').filter(Boolean)[0];
+      switch (first) {
+        case 'courses': setView(ViewState.COURSES); break;
+        case 'ai': setView(ViewState.AI_CHAT); break;
+        case 'scheduler': setView(ViewState.SCHEDULER); break;
+        case 'wellness': setView(ViewState.WELLNESS); break;
+        case 'login': setView(ViewState.LOGIN); break;
+        default: break;
+      }
+    } catch (e) {
+      // ignore (e.g., non-browser env)
+    }
+  }, []);
+
   const renderView = () => {
     switch (currentView) {
       case ViewState.HOME:
