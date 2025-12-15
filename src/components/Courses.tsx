@@ -324,7 +324,6 @@ export const Courses: React.FC = () => {
 
       <section className="hero-section">
         <h1 className="hero-title">BAMS Professional Courses</h1>
-        <p className="hero-subtitle">Choose your professional year or buy subjects individually. Each course includes chapter-wise videos, notes, and tests.</p>
       </section>
 
       <div className="proff-nav">
