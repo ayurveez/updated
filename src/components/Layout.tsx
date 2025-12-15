@@ -12,6 +12,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, isAdmin, setIsAdmin }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logoVisible, setLogoVisible] = useState(true);
 
   const navItems = [
     { label: 'Home', view: ViewState.HOME },
@@ -38,12 +39,18 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
         >
           <div className="w-12 h-12 flex items-center justify-center">
             {/* Build a safe logo URL from BASE_URL so GH Pages and root deployments both work */}
-            <img
-              src={`${(import.meta.env.BASE_URL || '/').replace(/\/$/, '')}/logo.jpg`}
-              alt="Ayurveez"
-              className="w-full h-full object-contain"
-              loading="lazy"
-            />
+            {logoVisible ? (
+              <img
+                src={`${(import.meta.env.BASE_URL || '/').replace(/\/$/, '')}/logo.jpg`}
+                alt="Ayurveez"
+                className="w-full h-full object-contain"
+                loading="lazy"
+                onError={() => setLogoVisible(false)}
+                onLoad={() => setLogoVisible(true)}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-ayur-green font-bold">AYURVEEZ</div>
+            )}
           </div>
           <div>
             <h1 className="text-2xl font-bold text-ayur-green tracking-wide">AYURVEEZ</h1>
