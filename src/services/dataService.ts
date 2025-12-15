@@ -88,7 +88,7 @@ export const dataService = {
           if (json && json.data) {
             // Normalize server rows to AccessCode shape (camelCase)
             // clear any local codes now that server is reachable and return server copy
-            try { localStorage.removeItem(CODES_KEY); } catch {}
+            try { localStorage.removeItem(CODES_KEY); (window as any).__AYURVEZ_SERVER_DOWN = false; } catch {}
             return (json.data as any[]).map(r => {
               const meta = r.metadata || {};
               const isHashed = r.is_hashed || meta.isHashed || false;
