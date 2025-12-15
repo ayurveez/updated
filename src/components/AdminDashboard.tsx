@@ -26,14 +26,41 @@ export const AdminDashboard: React.FC = () => {
     target: '' // ID (for PROFF/SUBJECT)
   });
   const [multiSelectTargets, setMultiSelectTargets] = useState<string[]>([]);
+  const [lastGeneratedCode, setLastGeneratedCode] = useState<string | null>(null);
+  const [lastRevealedCode, setLastRevealedCode] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
-    refreshData();
+    (async () => {
+      await refreshData();
+      // show server-down banner if set by dataService
+      try { const sdown = (window as any).__AYURVEZ_SERVER_DOWN; if (sdown) setServerDown(true); } catch {}
+    })();
+
+    // Poll for updates when on codes tab and start realtime subscription
+    let poll: any = null;
+    if (activeTab === 'codes') {
+      poll = setInterval(async () => {
+        await refreshData();
+        try { const sdown = (window as any).__AYURVEZ_SERVER_DOWN; setServerDown(!!sdown); } catch {}
+      }, 5000);
+
+      try {
+        // Try realtime subscription (preferred)
+        dataService.startRealtime(async () => {
+          await refreshData();
+        });
+      } catch (e) { /* ignore */ }
+    }
+    return () => { if (poll) clearInterval(poll); dataService.stopRealtime(); };
   }, []);
 
-  const refreshData = () => {
+  const [serverDown, setServerDown] = useState(false);
+
+  const refreshData = async () => {
     setCourses(dataService.getData());
-    setAccessCodes(dataService.getAccessCodes());
+    const codes = await dataService.getAccessCodes();
+    setAccessCodes(codes);
   };
 
   const saveData = (updatedCourses: Proff[]) => {
@@ -219,7 +246,7 @@ export const AdminDashboard: React.FC = () => {
     );
   };
 
-  const generateCode = () => {
+  const generateCode = async () => {
     if (!newCodeData.name) {
         alert("Please enter student name.");
         return;
@@ -265,27 +292,71 @@ export const AdminDashboard: React.FC = () => {
         isBlocked: false
     };
 
-    dataService.saveAccessCode(newAccessCode);
-    setAccessCodes(prev => [...prev, newAccessCode]);
+    const result = await dataService.saveAccessCode(newAccessCode);
+    if (result && (result as any).plainCode) {
+      setLastGeneratedCode((result as any).plainCode);
+    }
+    const fresh = await dataService.getAccessCodes();
+    setAccessCodes(fresh);
     setNewCodeData({ ...newCodeData, name: '' });
     setMultiSelectTargets([]);
     setActiveTab('codes');
   };
 
-  const deleteCode = (codeToDelete: string) => {
-      if(!window.confirm(`Delete access code ${codeToDelete}? User will lose access immediately.`)) return;
-      
-      // Delete from persistence
-      dataService.deleteAccessCode(codeToDelete);
-      
-      // Force update state filter
-      setAccessCodes(prevCodes => prevCodes.filter(c => c.code !== codeToDelete));
+  const copyGeneratedCode = async () => {
+    if (!lastGeneratedCode) return;
+    try { await navigator.clipboard.writeText(lastGeneratedCode); alert('Copied to clipboard'); }
+    catch { alert(lastGeneratedCode); }
   };
 
-  const toggleBlock = (codeToBlock: string) => {
-      const updatedCodes = dataService.toggleBlockAccessCode(codeToBlock);
-      setAccessCodes([...updatedCodes]); // Create new array reference to trigger re-render
+  const importLocalCodes = async () => {
+    if (!confirm('Import locally stored codes to Supabase (they will be hashed on the server)?')) return;
+    const clearAfter = confirm('Clear localStorage codes after successful import? Click OK to clear, Cancel to keep.');
+    setImporting(true);
+    try {
+      const res = await dataService.importLocalCodesToServer({ clearAfter });
+      alert(`Imported: ${res.imported}, Failed: ${res.failed}`);
+      const fresh = await dataService.getAccessCodes();
+      setAccessCodes(fresh);
+    } catch (e) {
+      console.error(e);
+      alert('Import failed; check console for details');
+    } finally {
+      setImporting(false);
+    }
   };
+
+    const deleteCode = async (codeToDelete: string) => {
+      if(!window.confirm(`Delete access code ${codeToDelete}? User will lose access immediately.`)) return;
+      await dataService.deleteAccessCode(codeToDelete);
+      const fresh = await dataService.getAccessCodes();
+      setAccessCodes(fresh);
+    };
+
+    const toggleBlock = async (codeToBlock: string) => {
+      const updatedCodes = await dataService.toggleBlockAccessCode(codeToBlock);
+      setAccessCodes([...updatedCodes]); // Create new array reference to trigger re-render
+    };
+
+    const revealCode = async (id?: string) => {
+      if (!id) return alert('No id provided');
+      const secret = prompt('Enter admin secret to reveal code');
+      if (!secret) return;
+      try {
+        const res = await fetch('/api/codes/decrypt', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-secret': secret }, body: JSON.stringify({ id }) });
+        if (!res.ok) {
+          const txt = await res.text();
+          return alert('Reveal failed: ' + txt);
+        }
+        const json = await res.json();
+        if (json && json.plain) {
+          setLastRevealedCode(json.plain);
+        } else alert('Reveal failed');
+      } catch (e) {
+        console.error(e);
+        alert('Reveal failed (check console)');
+      }
+    };
 
   return (
     <div className="flex h-[calc(100vh-80px)] bg-gray-100 relative">
@@ -329,8 +400,35 @@ export const AdminDashboard: React.FC = () => {
         {activeTab === 'codes' ? (
             // --- ACCESS CODE GENERATOR VIEW ---
             <div className="flex-1 overflow-y-auto p-6">
+                {serverDown && (
+                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">Server unavailable — currently using localStorage. Check network or server environment variables.</div>
+                )}
                 <h2 className="text-2xl font-bold text-ayur-brown mb-6">Student Access Codes</h2>
                 <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200">
+                    {lastGeneratedCode && (
+                      <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-semibold text-green-800">Code generated (store this safely)</div>
+                          <div className="font-mono font-bold text-lg text-ayur-brown">{lastGeneratedCode}</div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={copyGeneratedCode} className="px-3 py-1 bg-ayur-green text-white rounded">Copy</button>
+                          <button onClick={() => setLastGeneratedCode(null)} className="px-3 py-1 bg-gray-100 rounded">Dismiss</button>
+                        </div>
+                      </div>
+                    )}
+                    {lastRevealedCode && (
+                      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-semibold text-yellow-800">Revealed Code (store this safely)</div>
+                          <div className="font-mono font-bold text-lg text-ayur-brown">{lastRevealedCode}</div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={async () => { try { await navigator.clipboard.writeText(lastRevealedCode); alert('Copied'); } catch { alert(lastRevealedCode); } }} className="px-3 py-1 bg-ayur-green text-white rounded">Copy</button>
+                          <button onClick={() => setLastRevealedCode(null)} className="px-3 py-1 bg-gray-100 rounded">Dismiss</button>
+                        </div>
+                      </div>
+                    )}
                     <h3 className="font-bold text-lg mb-4 text-gray-700">Generate New Code</h3>
                     <div className="grid md:grid-cols-4 gap-4 items-start">
                         <div className="md:col-span-1">
@@ -397,12 +495,33 @@ export const AdminDashboard: React.FC = () => {
                             )}
                         </div>
                         <div className="h-full flex items-end pb-0.5">
-                           <button 
+                           <div className="flex gap-2 w-full">
+                             <button 
                                onClick={generateCode}
-                               className="w-full bg-ayur-green text-white py-2 px-4 rounded hover:bg-green-700 font-bold shadow"
-                           >
+                               className="flex-1 bg-ayur-green text-white py-2 px-4 rounded hover:bg-green-700 font-bold shadow"
+                             >
                                Generate Code
-                           </button>
+                             </button>
+                             <button 
+                               onClick={importLocalCodes}
+                               className="px-4 py-2 bg-blue-100 text-blue-700 rounded font-bold"
+                               disabled={importing}
+                               title="Import codes from localStorage to Supabase (hashes stored on server)"
+                             >
+                               {importing ? 'Importing...' : 'Import Local'}
+                             </button>
+                             <button
+                               onClick={() => {
+                                 if (!confirm('Remove all locally stored access codes from this browser?')) return;
+                                 const ok = dataService.clearLocalCodes();
+                                 if (ok) { alert('Local access codes cleared'); setAccessCodes([]); } else alert('Failed to clear local codes (check console)');
+                               }}
+                               className="px-4 py-2 bg-red-100 text-red-700 rounded font-bold"
+                               title="Clear locally stored access codes"
+                             >
+                               Clear Local
+                             </button>
+                           </div>
                         </div>
                     </div>
                 </div>
@@ -454,6 +573,11 @@ export const AdminDashboard: React.FC = () => {
                                         >
                                           <i className="fas fa-trash"></i>
                                         </button>
+                                        {codeItem.isEncrypted && (
+                                          <button onClick={() => revealCode(codeItem.id)} className="text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-full hover:bg-blue-100 transition-colors" title="Reveal Code (Admins only)">
+                                            <i className="fas fa-eye"></i>
+                                          </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

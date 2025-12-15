@@ -1,0 +1,32 @@
+[
+  {
+    "code": "AYUR-ABC123",
+    "studentName": "Rahul Kumar",
+    "type": "PROFF",
+    "targetId": "first-proff",
+    "targetName": "First Professional",
+    "generatedAt": "2025-12-01T12:00:00.000Z",
+    "isUsed": false,
+    "isBlocked": false
+  },
+  {
+    "code": "SUB-XYZ789",
+    "studentName": "Priya Sharma",
+    "type": "SUBJECT",
+    "targetId": "padarth-vigyan",
+    "targetName": "Padarth Vigyan",
+    "generatedAt": "2025-11-02T09:30:00.000Z",
+    "isUsed": false,
+    "isBlocked": false
+  },
+  {
+    "code": "MIX-555AAA",
+    "studentName": "Amit Patel",
+    "type": "MULTI",
+    "targetId": "[\"padarth-vigyan\",\"rachana-sharir\"]",
+    "targetName": "Padarth Vigyan, Rachana Sharir",
+    "generatedAt": "2025-10-15T08:00:00.000Z",
+    "isUsed": false,
+    "isBlocked": false
+  }
+]

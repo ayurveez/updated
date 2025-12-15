@@ -1,13 +1,12 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
-const sendError = (res: VercelResponse, code: number, message: string) => {
+const sendError = (res: any, code: number, message: string) => {
   res.status(code).json({ error: message });
 };
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   if (!API_KEY) return sendError(res, 500, 'GEMINI_API_KEY not configured on server');
 
   if (req.method !== 'POST') {

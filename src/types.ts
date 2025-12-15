@@ -70,6 +70,8 @@ export interface AccessCode {
   generatedAt: string;
   isUsed?: boolean; // Optional: track if logged in at least once
   isBlocked?: boolean; // New: allow admin to block access without deleting
+  id?: string;
+  isEncrypted?: boolean;
 }
 
 export interface StudentPermissions {
