@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+export default async (req, res) => {
   try {
     // Simple health check to verify serverless functions are reachable
     res.setHeader('Content-Type', 'application/json');
@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     console.error('Health handler error:', err);
     try { return res.status(500).json({ ok: false, error: String(err) }); } catch { /* ignore */ }
   }
-}
+};
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
