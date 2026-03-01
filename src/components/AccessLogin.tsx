@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ViewState, StudentPermissions } from '../types';
 import { dataService } from '../services/dataService';
@@ -15,17 +14,27 @@ export const AccessLogin: React.FC<AccessLoginProps> = ({ setView, setIsAdmin, s
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // Add loading state
 
-  const handleStudentLogin = (e: React.FormEvent) => {
+  const handleStudentLogin = async (e: React.FormEvent) => {  // ✅ Make async
     e.preventDefault();
-    const perms = dataService.verifyStudentCode(code);
+    setLoading(true); // Start loading
+    setError('');
     
-    if (perms) {
-      setIsAdmin(false);
-      setPermissions(perms); // Save permissions to state
-      setView(ViewState.STUDENT_DASHBOARD);
-    } else {
-      setError('Invalid Access Code. Please check your WhatsApp/Email.');
+    try {
+      const perms = await dataService.verifyStudentCode(code); // ✅ Add await
+      
+      if (perms) {
+        setIsAdmin(false);
+        setPermissions(perms);
+        setView(ViewState.STUDENT_DASHBOARD);
+      } else {
+        setError('Invalid Access Code. Please check your WhatsApp/Email.');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -80,13 +89,21 @@ export const AccessLogin: React.FC<AccessLoginProps> = ({ setView, setIsAdmin, s
                 placeholder="Enter unique code (e.g. AYUR-FP-1234)"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ayur-green outline-none font-mono uppercase"
                 required
+                disabled={loading} // Disable while loading
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-ayur-green hover:bg-green-700 text-white py-3 rounded-lg font-bold transition-colors shadow-md"
+              disabled={loading} // Disable while loading
+              className="w-full bg-ayur-green hover:bg-green-700 text-white py-3 rounded-lg font-bold transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Access Dashboard
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <i className="fas fa-spinner fa-spin"></i> Verifying...
+                </span>
+              ) : (
+                'Access Dashboard'
+              )}
             </button>
             <p className="text-xs text-center text-gray-500 mt-4">
               Don't have a code? <a href="#" className="text-ayur-saffron hover:underline">Enroll now</a> to receive one on WhatsApp.
