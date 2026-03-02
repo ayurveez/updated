@@ -79,20 +79,5 @@ export interface StudentPermissions {
   allowedSubjects: string[]; // List of Subject IDs
 }
 
-// Add to your existing types.ts if not present
-export interface OTPResponse {
-  success: boolean;
-  message?: string;
-  error?: string;
-  code?: string;
-}
-
-export interface UserCheckResponse {
-  success: boolean;
-  exists: boolean;
-  name?: string;
-  error?: string;
-}
-
 export const PAYMENT_LINK = "https://payments.cashfree.com/forms/Ayurveez-Bams";
 export const SUPPORT_LINK = "https://whatsform.com/6Ih-pp";
