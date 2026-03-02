@@ -1,4 +1,3 @@
-
 export interface ChatMessage {
   id: string;
   role: 'user' | 'model';
@@ -79,5 +78,38 @@ export interface StudentPermissions {
   allowedSubjects: string[]; // List of Subject IDs
 }
 
+// Google Sheets API Response Types (NEW)
+export interface CheckUserResponse {
+  success: boolean;
+  exists: boolean;
+  name?: string;
+  error?: string;
+  row?: number;
+}
+
+export interface SendOTPResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  email?: string;
+}
+
+export interface VerifyOTPResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  code?: string; // Registration code from Column Z
+  name?: string;
+}
+
+export interface VerifyCodeResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  name?: string;
+  email?: string;
+}
+
+// Constants
 export const PAYMENT_LINK = "https://payments.cashfree.com/forms/Ayurveez-Bams";
 export const SUPPORT_LINK = "https://whatsform.com/6Ih-pp";
