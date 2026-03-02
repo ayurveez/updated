@@ -1,8 +1,8 @@
-
 import { Proff, AccessCode, StudentPermissions } from "../types";
 
 const DATA_KEY = 'ayurveez_data_v1';
 const CODES_KEY = 'ayurveez_codes_v1';
+const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL || '';
 
 // Initial Seed Data
 const INITIAL_DATA: Proff[] = [
@@ -253,6 +253,105 @@ export const dataService = {
   generateCode: (prefix: string): string => {
     const random = Math.random().toString(36).substring(2, 8).toUpperCase();
     return `${prefix}-${random}`;
+  },
+
+  // Google Sheets Integration Methods
+  checkUserExists: async (email: string): Promise<{ success: boolean; exists: boolean; name?: string; error?: string }> => {
+    try {
+      if (!APPS_SCRIPT_URL) {
+        return { success: false, exists: false, error: 'OTP service not configured' };
+      }
+      
+      const url = `${APPS_SCRIPT_URL}?action=checkUser&email=${encodeURIComponent(email)}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error checking user:', error);
+      return { success: false, exists: false, error: 'Failed to check user' };
+    }
+  },
+
+  sendOTP: async (email: string): Promise<{ success: boolean; message?: string; error?: string }> => {
+    try {
+      if (!APPS_SCRIPT_URL) {
+        return { success: false, error: 'OTP service not configured' };
+      }
+
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          action: 'sendOTP',
+          email: email
+        })
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      return { success: false, error: 'Failed to send OTP' };
+    }
+  },
+
+  verifyOTP: async (email: string, otp: string): Promise<{ success: boolean; code?: string; error?: string }> => {
+    try {
+      if (!APPS_SCRIPT_URL) {
+        return { success: false, error: 'OTP service not configured' };
+      }
+
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          action: 'verifyOTP',
+          email: email,
+          otp: otp
+        })
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      return { success: false, error: 'Failed to verify OTP' };
+    }
+  },
+
+  verifyRegistrationCode: async (code: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      if (!APPS_SCRIPT_URL) {
+        // Fallback to local verification if Apps Script not configured
+        const codes = dataService.getAccessCodesSync();
+        const found = codes.find(c => c.code === code.trim().toUpperCase());
+        if (found) {
+          return { success: true };
+        }
+        return { success: false, error: 'Invalid registration code' };
+      }
+
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          action: 'verifyCode',
+          code: code
+        })
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error verifying registration code:', error);
+      return { success: false, error: 'Failed to verify code' };
+    }
   },
 
   // Verify Login with Expiry Logic
