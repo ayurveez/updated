@@ -1,8 +1,8 @@
+
 import { Proff, AccessCode, StudentPermissions } from "../types";
 
 const DATA_KEY = 'ayurveez_data_v1';
 const CODES_KEY = 'ayurveez_codes_v1';
-const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL || '';
 
 // Initial Seed Data
 const INITIAL_DATA: Proff[] = [
@@ -78,6 +78,7 @@ export const dataService = {
   // Access Code Methods
   getAccessCodes: async (): Promise<AccessCode[]> => {
     try {
+      // quick health check to detect if server is reachable
       const health = await fetch('/api/codes?health=1');
       if (!health.ok) throw new Error('Server health check failed');
 
@@ -85,6 +86,8 @@ export const dataService = {
       if (res.ok) {
         const json = await res.json();
           if (json && json.data) {
+            // Normalize server rows to AccessCode shape (camelCase)
+            // clear any local codes now that server is reachable and return server copy
             try { localStorage.removeItem(CODES_KEY); (window as any).__AYURVEZ_SERVER_DOWN = false; } catch {}
             return (json.data as any[]).map(r => {
               const meta = r.metadata || {};
@@ -116,6 +119,7 @@ export const dataService = {
 
   saveAccessCode: async (codeObj: AccessCode): Promise<{ data?: AccessCode; plainCode?: string } | null> => {
     try {
+      // Send the plaintext only as `plainCode` so server can hash it, but avoid storing plaintext in metadata
       const metaClean = Object.assign({}, codeObj) as any;
       if (metaClean.code) delete metaClean.code;
       const payload = {
@@ -126,6 +130,7 @@ export const dataService = {
       const res = await fetch('/api/codes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (res.ok) {
         const json = await res.json();
+        // Server returns { data, plainCode }
         if (json && json.data) return { data: json.data, plainCode: json.plainCode } as any;
       }
     } catch (e) {
@@ -133,9 +138,11 @@ export const dataService = {
       try { (window as any).__AYURVEZ_SERVER_DOWN = true; } catch {}
     }
 
+    // Fallback to localStorage for offline/demo usage
     const codes = dataService.getAccessCodesSync();
     codes.push(codeObj);
     localStorage.setItem(CODES_KEY, JSON.stringify(codes));
+    // Return shape similar to server response so callers (UI) can show the generated code
     return { data: codeObj, plainCode: codeObj.code };
   },
 
@@ -155,6 +162,7 @@ export const dataService = {
       if (res.ok) {
         const json = await res.json();
         if (json && json.data) {
+          // Return fresh list from server
           const list = await dataService.getAccessCodes();
           return list;
         }
@@ -170,11 +178,13 @@ export const dataService = {
     return dataService.getAccessCodesSync();
   },
 
+  // Synchronous helper for local-only fallback
   getAccessCodesSync: (): AccessCode[] => {
     const stored = localStorage.getItem(CODES_KEY);
     return stored ? JSON.parse(stored) : [];
   },
 
+  // Import local codes (read from localStorage) to server (hashed-only). Returns import summary.
   importLocalCodesToServer: async (options?: { clearAfter?: boolean }): Promise<{ imported: number; failed: number; errors: any[] }> => {
     const local = dataService.getAccessCodesSync();
     let imported = 0, failed = 0;
@@ -182,11 +192,12 @@ export const dataService = {
     for (const c of local) {
       try {
         const meta = Object.assign({}, c) as any;
-        if (meta.code) delete meta.code;
+        if (meta.code) delete meta.code; // ensure plaintext isn't stored in metadata
         const payload = { plainCode: c.code, metadata: meta };
         const res = await fetch('/api/codes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         if (res.ok) imported += 1;
         else {
+          // treat duplicate insert (conflict) as already-imported
           if (res.status === 409) { imported += 1; }
           else { failed += 1; const txt = await res.text(); errors.push({ code: c.code, status: res.status, body: txt }); }
         }
@@ -197,10 +208,12 @@ export const dataService = {
     if (options?.clearAfter) {
       localStorage.removeItem(CODES_KEY);
     }
+    // If we successfully imported anything, clear the server-down flag
     try { if (imported > 0) (window as any).__AYURVEZ_SERVER_DOWN = false; } catch {}
     return { imported, failed, errors };
   },
 
+  // Realtime subscription to assigned_codes table via Supabase (client-side)
   _realtimeSub: null as any,
   startRealtime: (onChange: () => void) => {
     try {
@@ -218,7 +231,6 @@ export const dataService = {
       return null;
     }
   },
-  
   stopRealtime: () => {
     try {
       if (dataService._realtimeSub && dataService._realtimeSub.unsubscribe) dataService._realtimeSub.unsubscribe();
@@ -226,6 +238,7 @@ export const dataService = {
     } catch (e) { console.warn('Failed to stop realtime', e); }
   },
 
+  // Remove locally stored access codes
   clearLocalCodes: (): boolean => {
     try {
       localStorage.removeItem(CODES_KEY);
@@ -236,142 +249,17 @@ export const dataService = {
     }
   },
 
+  // Generate a unique code
   generateCode: (prefix: string): string => {
     const random = Math.random().toString(36).substring(2, 8).toUpperCase();
     return `${prefix}-${random}`;
-  },
-
-  // GOOGLE SHEETS INTEGRATION METHODS
-  checkUserExists: async (email: string): Promise<{ success: boolean; exists: boolean; name?: string; error?: string }> => {
-    try {
-      if (!APPS_SCRIPT_URL) {
-        return { success: false, exists: false, error: 'OTP service not configured' };
-      }
-      
-      console.log('Checking user with email:', email);
-      
-      const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'cors',
-        redirect: 'follow',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          action: 'checkUser',
-          email: email
-        })
-      });
-      
-      const data = await response.json();
-      console.log('Check user response:', data);
-      return data;
-    } catch (error) {
-      console.error('Error checking user:', error);
-      return { success: false, exists: false, error: 'Failed to check user' };
-    }
-  },
-
-  sendOTP: async (email: string): Promise<{ success: boolean; message?: string; error?: string }> => {
-    try {
-      if (!APPS_SCRIPT_URL) {
-        return { success: false, error: 'OTP service not configured' };
-      }
-
-      console.log('Sending OTP to email:', email);
-      
-      const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'cors',
-        redirect: 'follow',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          action: 'sendOTP',
-          email: email
-        })
-      });
-      
-      const data = await response.json();
-      console.log('Send OTP response:', data);
-      return data;
-    } catch (error) {
-      console.error('Error sending OTP:', error);
-      return { success: false, error: 'Failed to send OTP: ' + error.message };
-    }
-  },
-
-  verifyOTP: async (email: string, otp: string): Promise<{ success: boolean; code?: string; error?: string }> => {
-    try {
-      if (!APPS_SCRIPT_URL) {
-        return { success: false, error: 'OTP service not configured' };
-      }
-
-      console.log('Verifying OTP for email:', email);
-      
-      const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'cors',
-        redirect: 'follow',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          action: 'verifyOTP',
-          email: email,
-          otp: otp
-        })
-      });
-      
-      const data = await response.json();
-      console.log('Verify OTP response:', data);
-      return data;
-    } catch (error) {
-      console.error('Error verifying OTP:', error);
-      return { success: false, error: 'Failed to verify OTP' };
-    }
-  },
-
-  verifyRegistrationCode: async (code: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      if (!APPS_SCRIPT_URL) {
-        const codes = dataService.getAccessCodesSync();
-        const found = codes.find(c => c.code === code.trim().toUpperCase());
-        if (found) {
-          return { success: true };
-        }
-        return { success: false, error: 'Invalid registration code' };
-      }
-
-      console.log('Verifying registration code');
-      
-      const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'cors',
-        redirect: 'follow',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          action: 'verifyCode',
-          code: code
-        })
-      });
-      
-      const data = await response.json();
-      console.log('Verify code response:', data);
-      return data;
-    } catch (error) {
-      console.error('Error verifying registration code:', error);
-      return { success: false, error: 'Failed to verify code' };
-    }
   },
 
   // Verify Login with Expiry Logic
   verifyStudentCode: async (codeStr: string): Promise<StudentPermissions | null> => {
     const codeStrClean = codeStr.trim();
 
+    // DEMO BACKDOOR for testing (No Expiry)
     if (codeStrClean.toUpperCase() === 'DEMO123') {
         return { allowedProffs: ['first-proff'], allowedSubjects: [] };
     }
@@ -408,6 +296,7 @@ export const dataService = {
       console.warn('Code validation failed against server, falling back to local check', e);
     }
 
+    // Fallback to local check
     const codes = dataService.getAccessCodesSync();
     const found = codes.find(c => c.code === codeStrClean.toUpperCase());
     if (!found) return null;
@@ -428,6 +317,7 @@ export const dataService = {
     };
   },
 
+  // Helper to extract ID from various YouTube URL formats
   extractYoutubeId: (url: string): string => {
     if (!url) return '';
     if (url.length === 11 && !url.includes('.') && !url.includes('/')) return url;
@@ -437,9 +327,12 @@ export const dataService = {
     return (match && match[2].length === 11) ? match[2] : url;
   },
 
+  // Helper to convert Google Drive View URLs to Preview (Embed) URLs
   getEmbedUrl: (url: string): string => {
     if (!url) return '';
+    // Check if it's a Google Drive URL
     if (url.includes('drive.google.com')) {
+      // Replace /view with /preview to allow embedding
       return url.replace(/\/view.*/, '/preview');
     }
     return url;
